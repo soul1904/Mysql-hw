@@ -38,6 +38,9 @@ Upon running the program, the customer is greeted with three options. They can v
 5. Then create a Node application called `bamazonCustomer.js`. Running this application will first display all of the items available for sale. Include the ids, names, and prices of products for sale.
 
 6. The app should then prompt users with two messages.
+## Demo
+![HW](mysqlHw1.png)
+Format: ![Alt Text](url)
 
    * The first should ask them the ID of the product they would like to buy.
    * The second message should ask how many units of the product they would like to buy.
