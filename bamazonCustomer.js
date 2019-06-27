@@ -19,7 +19,7 @@ var connection = mysql.createConnection({
 connection.connect(function (err) {
     if (err) throw err;
     console.log("you made something work!");
-    connection.end();
+    // connection.end();
     showProducts();
 });
 
@@ -64,13 +64,7 @@ function start() {
             connection.query(queryProducts, { item_id: product }, function (err, res) {
                 var productInfo = res[0];
                 if (err) throw err;
-                if (quantity > productInfo.stock_quantity) {
-                    console.log("NOT ENOUGH");
-                    showProducts()
-
-                }
-
-                else {
+    
 
                     if (quantity <= productInfo.stock_quantity) {
                         console.log("We have " + quantity + " " + productInfo.product_name + "s in stock for your order!")
@@ -106,7 +100,7 @@ function start() {
 
                         }
                     })
-                }
+                
 
 
             })
