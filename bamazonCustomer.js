@@ -20,26 +20,26 @@ connection.connect(function (err) {
     if (err) throw err;
     console.log("you made something work!");
     connection.end();
-    allProducts();
+    showProducts();
 });
 
-function allProducts() {
+function showProducts() {
     // query the database for all items for sale
-    connection.query("SELECT * from products;", function (err, results) {
+    connection.query("SELECT * FROM products;", function (err, results) {
         if (err) throw err;
         else {
             // console log all products
             console.table(results);
 
         }
-        pickProduct();
+        start();
 
     }
 
     )
 }
 
-function pickProduct() {
+function start() {
     inquirer
         .prompt([
             {
@@ -66,7 +66,7 @@ function pickProduct() {
                 if (err) throw err;
                 if (quantity > productInfo.stock_quantity) {
                     console.log("NOT ENOUGH");
-                    allProducts()
+                    showProducts()
 
                 }
 
@@ -75,7 +75,7 @@ function pickProduct() {
                     if (quantity <= productInfo.stock_quantity) {
                         console.log("We have " + quantity + " " + productInfo.product_name + "s in stock for your order!")
 
-                        console.log("Thank you for your order! Please wait while we process your order!");
+                        console.log("Thank you for your order");
                     }
                     if (cost = quantity * productInfo.price) {
                         console.log("The total cost of your order is $" + cost );
@@ -95,10 +95,10 @@ function pickProduct() {
                                 })
                                 .then(function (answer) {
                                     if (answer.next === "Yes") {
-                                        allProducts();
+                                        showProducts();
                                     } else {
                                         connection.end()
-                                        console.log("Thank you for shopping with us! Come back soon!")
+                                        console.log("Come back soon!")
                                     }
 
                                 });
