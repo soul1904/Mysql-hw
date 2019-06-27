@@ -16,82 +16,102 @@ var connection = mysql.createConnection({
     database: "products_db"
 });
 
-// connect to the mysql server and sql database
 connection.connect(function (err) {
     if (err) throw err;
-    // run the start function after the connection is made to prompt the user
-    start();
+    console.log("you made something work!");
+    connection.end();
+    allProducts();
 });
 
+function allProducts() {
+    // query the database for all items for sale
+    connection.query("SELECT * from products;", function (err, results) {
+        if (err) throw err;
+        else {
+            // console log all products
+            console.table(results);
 
-// function which prompts the user for what action they should take
-function start() {
-    inquirer
-        .prompt({
-            name: "startPage",
-            type: "list",
-            message: "CLICK BEGIN TO ENTER",
-            choices: ["BEGIN", "EXIT"]
-        })
-        .then(function (answer) {
-            // based on their answer, either call the bid or the BEGIN functions
-            if (answer.startPage === "BEGIN") {
-                beginQ();
+        }
+        pickProduct();
 
-                connection.end();
-            }
-        });
+    }
+
+    )
 }
 
-
-function beginQ() {
-
-    // const startingQuestions = 
+function pickProduct() {
     inquirer
         .prompt([
             {
-                name: "productName",
+                name: "product",
                 type: "input",
-                message: "What is the ID of the product you would like to buy?\n",
+                message: "WHAT IS THE ID OF THE PRODUCT YOU ARE LOOKING FOR?"
             },
             {
                 name: "quantity",
                 type: "input",
-                message: "How many units of the product would you like to buy?",
-                validate: function (value) {
-                    if (isNaN(value) === false) {
-                        return true;
-                    }
-                    return "Numbers only!!!";
+                message: "HOW MANY WOULD YOU LIKE ?"
+            }
+        ])
+        .then(function (answer) {
+
+
+            var product = answer.product;
+            var quantity = answer.quantity;
+
+            var queryProducts = "SELECT * FROM products WHERE ?";
+            var cost
+            connection.query(queryProducts, { item_id: product }, function (err, res) {
+                var productInfo = res[0];
+                if (err) throw err;
+                if (quantity > productInfo.stock_quantity) {
+                    console.log("NOT ENOUGH");
+                    allProducts()
+
                 }
-            }]).then(function (answer) {
-                //connect to the mySQL database and run this query below (shows info of product data based on user input)
-                connection.query("SELECT product_name, price, stock_quantity from products WHERE item_id = ?", [answer.productName], function (err, res) {
-                    //     if (err) throw err;
-                    //     //Check to see if we have enough qty.
-                    var newQuantity = answer.quantity;
-                    //     if (parseInt(res[0].stock_quantity) > answer.quantity) {
-                    //Update the database with the new quantity
-                    connection.query("UPDATE products SET stock_quantity = ? WHERE item_id = ?", [newQuantity, answer.productName], function (err, res) {
-                        if (err) throw err;
 
-                        console.log(res);
+                else {
 
-                    });
-                });
+                    if (quantity <= productInfo.stock_quantity) {
+                        console.log("We have " + quantity + " " + productInfo.product_name + "s in stock for your order!")
 
-                connection.query(
-                    "INSERT INTO products SET ?",
-                    {
-                        product_name: answer.productName,
-                        stock_quantity: answer.quantity || 0,
-                    },
-                    function (err) {
-                        if (err) throw err;
-                        console.log("Your product was created successfully!");
-                        // re-prompt the user for if they want to bid or post
-                        beginQ();
+                        console.log("Thank you for your order! Please wait while we process your order!");
                     }
-                )
+                    if (cost = quantity * productInfo.price) {
+                        console.log("The total cost of your order is $" + cost );
+                    }
+
+                    var queryUpdate = "UPDATE products SET ? WHERE ?"
+                    connection.query(queryUpdate, [{ stock_quantity: answer.quantity }, { item_id: product }], function (err, res) {
+                        if (err) throw err;
+                        else {
+                            console.log("Inventory has been updated!");
+
+                            inquirer
+                                .prompt({
+                                    name: 'next',
+                                    type: "input",
+                                    message: 'Would you like to place another order (Yes/No)?',
+                                })
+                                .then(function (answer) {
+                                    if (answer.next === "Yes") {
+                                        allProducts();
+                                    } else {
+                                        connection.end()
+                                        console.log("Thank you for shopping with us! Come back soon!")
+                                    }
+
+                                });
+
+
+                        }
+                    })
+                }
+
+
             })
-};
+
+        })
+
+
+}
